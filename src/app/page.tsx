@@ -62,12 +62,6 @@ const letterVariants: Variants = {
   }
 };
 
-const pageTransitionVariants: Variants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.5 } },
-  exit: { opacity: 0, transition: { duration: 0.3 } }
-};
-
 // Button hover and tap effects
 const buttonHoverEffect = { 
   scale: 1.02, 
@@ -79,20 +73,15 @@ const buttonTapEffect = {
   scale: 0.98 
 };
 
-// For use with variants
-const buttonHoverVariants: Variants = {
-  initial: { boxShadow: '0 0 0px rgba(234,234,234,0)' },
-  hover: buttonHoverEffect,
-  tap: buttonTapEffect
-};
-
 // Web Audio API Sound Utility
 const useSoundEffects = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const initAudioContext = () => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Fix the type issue with webkitAudioContext
+      const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
     }
     return audioContextRef.current;
   };
@@ -181,7 +170,7 @@ const useSoundEffects = () => {
 };
 
 // Sovereign Shard logo component
-const SovereignShard = memo(({ className }: { className?: string }) => {
+const SovereignShard = memo<{ className?: string }>(function SovereignShard({ className }) {
   return (
     <svg 
       width="40" 
@@ -215,7 +204,7 @@ const SovereignShard = memo(({ className }: { className?: string }) => {
 });
 
 // Intro Animation Component
-const IntroAnimation = memo(({ onComplete }: { onComplete: () => void }) => {
+const IntroAnimation = memo<{ onComplete: () => void }>(function IntroAnimation({ onComplete }) {
   return (
     <motion.div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-black"
@@ -249,7 +238,7 @@ const IntroAnimation = memo(({ onComplete }: { onComplete: () => void }) => {
 });
 
 // Aura Watermark Component
-const AuraWatermark = memo(() => {
+const AuraWatermark = memo(function AuraWatermark() {
   return (
     <motion.div 
       className="fixed bottom-8 left-8 z-50 opacity-20 hover:opacity-50 transition-opacity duration-500"
@@ -275,17 +264,12 @@ const AuraWatermark = memo(() => {
 });
 
 // Custom input component with cinematic forge styling
-const ForgeInput = memo(({ 
-  label, 
-  value, 
-  onChange, 
-  placeholder 
-}: { 
+const ForgeInput = memo<{ 
   label: string; 
   value: string; 
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
   placeholder: string 
-}) => {
+}>(function ForgeInput({ label, value, onChange, placeholder }) {
   return (
     <motion.div 
       className="flex flex-col gap-2 mb-8" 
@@ -307,7 +291,7 @@ const ForgeInput = memo(({
 });
 
 // Text animation component for letter-by-letter reveal
-const AnimatedText = memo(({ text, className }: { text: string, className?: string }) => {
+const AnimatedText = memo<{ text: string, className?: string }>(function AnimatedText({ text, className }) {
   return (
     <motion.span 
       className={className}
@@ -325,13 +309,10 @@ const AnimatedText = memo(({ text, className }: { text: string, className?: stri
 });
 
 // Proof of Work Component
-const ProofOfWork = memo(({ 
-  onConfirm, 
-  onCancel 
-}: { 
+const ProofOfWork = memo<{ 
   onConfirm: (text: string) => void; 
   onCancel: () => void 
-}) => {
+}>(function ProofOfWork({ onConfirm, onCancel }) {
   const [logText, setLogText] = useState('');
   const { playSound } = useSoundEffects();
   
@@ -393,7 +374,7 @@ const ProofOfWork = memo(({
 });
 
 // Consent Screen Component
-const ConsentScreen = memo(({ onConsent }: { onConsent: () => void }) => {
+const ConsentScreen = memo<{ onConsent: () => void }>(function ConsentScreen({ onConsent }) {
   const { playSound } = useSoundEffects();
   
   const handleConsent = useCallback(() => {
@@ -433,7 +414,7 @@ const ConsentScreen = memo(({ onConsent }: { onConsent: () => void }) => {
 });
 
 // Onboarding Screen Component
-const OnboardingScreen = memo(({ onForgeOath }: { onForgeOath: (reign: string, protocol: string) => void }) => {
+const OnboardingScreen = memo<{ onForgeOath: (reign: string, protocol: string) => void }>(function OnboardingScreen({ onForgeOath }) {
   // Local state for input fields
   const [reign, setReign] = useState('');
   const [protocol, setProtocol] = useState('');
@@ -491,7 +472,7 @@ const OnboardingScreen = memo(({ onForgeOath }: { onForgeOath: (reign: string, p
         className="mt-8 bg-foreground text-background py-4 px-8 font-mono font-bold tracking-wider uppercase hover:bg-[#CCCCCC] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
         variants={itemVariants}
         whileHover={reign && protocol ? buttonHoverEffect : {}}
-         whileTap={reign && protocol ? buttonTapEffect : {}}
+        whileTap={reign && protocol ? buttonTapEffect : {}}
       >
         FORGE MY OATH
       </motion.button>
@@ -500,15 +481,11 @@ const OnboardingScreen = memo(({ onForgeOath }: { onForgeOath: (reign: string, p
 });
 
 // Active Oath Screen Component
-const ActiveOathScreen = memo(({ 
-  auraState, 
-  onUpholdOath, 
-  onBreakOath 
-}: { 
+const ActiveOathScreen = memo<{ 
   auraState: AuraState, 
   onUpholdOath: () => void, 
   onBreakOath: () => void 
-}) => {
+}>(function ActiveOathScreen({ auraState, onUpholdOath, onBreakOath }) {
   const { playSound } = useSoundEffects();
   
   // Check if the oath was already upheld today
@@ -583,7 +560,7 @@ const ActiveOathScreen = memo(({
           className="bg-foreground text-background py-4 px-8 font-mono font-bold tracking-wider uppercase hover:bg-[#CCCCCC] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
           variants={itemVariants}
           whileHover={!isUpheldToday ? buttonHoverEffect : {}}
-           whileTap={!isUpheldToday ? buttonTapEffect : {}}
+          whileTap={!isUpheldToday ? buttonTapEffect : {}}
         >
           {isUpheldToday ? 'OATH UPHELD TODAY' : 'I UPHELD THE OATH'}
         </motion.button>
@@ -602,7 +579,7 @@ const ActiveOathScreen = memo(({
 });
 
 // Broken Oath Screen Component
-const BrokenOathScreen = memo(({ onBeginAnew }: { onBeginAnew: () => void }) => {
+const BrokenOathScreen = memo<{ onBeginAnew: () => void }>(function BrokenOathScreen({ onBeginAnew }) {
   const { playSound } = useSoundEffects();
   
   const handleBeginAnew = useCallback(() => {
@@ -640,7 +617,7 @@ const BrokenOathScreen = memo(({ onBeginAnew }: { onBeginAnew: () => void }) => 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { delay: 3.5, duration: 1 } }}
         whileHover={buttonHoverEffect}
-         whileTap={buttonTapEffect}
+        whileTap={buttonTapEffect}
       >
         BEGIN ANEW
       </motion.button>
@@ -656,7 +633,6 @@ export default function AuraPage() {
   const [auraState, setAuraState] = useState<AuraState | null>(null);
   const [showProofOfWork, setShowProofOfWork] = useState(false);
   const hasInitialized = useRef(false);
-  const { playSound } = useSoundEffects();
   
   // Handle intro completion
   const handleIntroComplete = useCallback(() => {
